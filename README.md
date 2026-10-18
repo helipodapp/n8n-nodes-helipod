@@ -83,6 +83,10 @@ A deploy charges the service's cost for today, and **Set Variables** and **Delet
 
 ## Version history
 
+### 0.2.1
+
+- Service starts on Get instead of Deploy, so a new node or AI tool starts on a free, read-only action.
+
 ### 0.2.0
 
 - Searchable pickers for projects, environments, services, VPS and domains.

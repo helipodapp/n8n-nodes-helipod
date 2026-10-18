@@ -151,7 +151,7 @@ export const serviceDescription: INodeProperties[] = [
 				},
 			},
 		],
-		default: 'deploy',
+		default: 'get',
 	},
 	{
 		...environmentSelect,
