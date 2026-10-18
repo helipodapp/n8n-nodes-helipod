@@ -1,48 +1,55 @@
 {
-  "name": "n8n-nodes-helipod",
-  "version": "0.1.0",
-  "description": "n8n node for Helipod: redeploy and restart services, manage VPS, search domains, send email and read your wallet.",
-  "keywords": [
-    "n8n-community-node-package",
-    "helipod",
-    "deploy",
-    "vps",
-    "hosting",
-    "indonesia"
-  ],
-  "license": "MIT",
-  "homepage": "https://docs.helipod.io/docs/helipod/n8n",
-  "author": {
-    "name": "Helipod",
-    "email": "hello@helipod.io"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/helipodapp/n8n-nodes-helipod.git"
-  },
-  "scripts": {
-    "build": "rm -rf dist && tsc && cp nodes/Helipod/helipod.svg dist/nodes/Helipod/ && cp nodes/Helipod/helipod.svg dist/credentials/"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [
-      "dist/credentials/HelipodApi.credentials.js",
-      "dist/credentials/HelipodOAuth2Api.credentials.js"
-    ],
-    "nodes": [
-      "dist/nodes/Helipod/Helipod.node.js"
-    ]
-  },
-  "devDependencies": {
-    "n8n-workflow": "*",
-    "typescript": "^5.6.0"
-  },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  }
+	"name": "n8n-nodes-helipod",
+	"version": "0.2.0",
+	"description": "n8n node for Helipod: deploy and restart services, manage VPS, check domains, send email and read your wallet.",
+	"license": "MIT",
+	"homepage": "https://docs.helipod.io/docs/helipod/n8n",
+	"keywords": [
+		"n8n-community-node-package",
+		"helipod",
+		"deploy",
+		"vps",
+		"hosting"
+	],
+	"author": {
+		"name": "Helipod",
+		"email": "hello@helipod.io"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/helipodapp/n8n-nodes-helipod.git"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/HelipodApi.credentials.js",
+			"dist/credentials/HelipodOAuth2Api.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Helipod/Helipod.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "^0.52.5",
+		"eslint": "9.39.4",
+		"prettier": "3.8.3",
+		"release-it": "20.2.0",
+		"typescript": "5.9.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
 }
