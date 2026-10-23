@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-helipod",
-	"version": "0.2.1",
-	"description": "n8n node for Helipod: deploy and restart services, manage VPS, check domains, send email and read your wallet.",
+	"version": "0.3.0",
+	"description": "n8n node for Helipod: deploy services, run SQL on managed Postgres, use AI models, manage VPS, domains and DNS, and send email.",
 	"license": "MIT",
 	"homepage": "https://docs.helipod.io/docs/helipod/n8n",
 	"keywords": [
@@ -9,7 +9,9 @@
 		"helipod",
 		"deploy",
 		"vps",
-		"hosting"
+		"hosting",
+		"postgres",
+		"ai"
 	],
 	"author": {
 		"name": "Helipod",

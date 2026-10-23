@@ -1,15 +1,25 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { getDatabases } from './listSearch/getDatabases';
 import { getDomains } from './listSearch/getDomains';
 import { getEnvironments } from './listSearch/getEnvironments';
 import { getProjects } from './listSearch/getProjects';
 import { getServices } from './listSearch/getServices';
 import { getVpsList } from './listSearch/getVpsList';
 import { accountDescription } from './resources/account';
+import { aiDescription } from './resources/ai';
+import { databaseDescription } from './resources/database';
 import { domainDescription } from './resources/domain';
 import { emailDescription } from './resources/email';
 import { projectDescription } from './resources/project';
 import { serviceDescription } from './resources/service';
 import { vpsDescription } from './resources/vps';
+import {
+	getChatModels,
+	getImageModels,
+	getTemplates,
+	getVpsOsTemplates,
+	getVpsPlans,
+} from './shared/loadOptions';
 import { API_BASE_URL } from './shared/transport';
 
 export class Helipod implements INodeType {
@@ -20,7 +30,8 @@ export class Helipod implements INodeType {
 		group: ['output'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Deploy and restart services, manage VPS, check domains and send email on Helipod',
+		description:
+			'Deploy services, run databases, manage VPS and domains, send email and use AI models on Helipod',
 		defaults: {
 			name: 'Helipod',
 		},
@@ -41,6 +52,8 @@ export class Helipod implements INodeType {
 		],
 		requestDefaults: {
 			baseURL: API_BASE_URL,
+			// Error answers reach unwrapResponse, which reports the API's own message.
+			ignoreHttpStatusErrors: true,
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -64,6 +77,8 @@ export class Helipod implements INodeType {
 				noDataExpression: true,
 				options: [
 					{ name: 'Account', value: 'account' },
+					{ name: 'AI', value: 'ai' },
+					{ name: 'Database', value: 'database' },
 					{ name: 'Domain', value: 'domain' },
 					{ name: 'Email', value: 'email' },
 					{ name: 'Project', value: 'project' },
@@ -73,6 +88,8 @@ export class Helipod implements INodeType {
 				default: 'service',
 			},
 			...accountDescription,
+			...aiDescription,
+			...databaseDescription,
 			...domainDescription,
 			...emailDescription,
 			...projectDescription,
@@ -82,7 +99,15 @@ export class Helipod implements INodeType {
 	};
 
 	methods = {
+		loadOptions: {
+			getChatModels,
+			getImageModels,
+			getTemplates,
+			getVpsOsTemplates,
+			getVpsPlans,
+		},
 		listSearch: {
+			getDatabases,
 			getDomains,
 			getEnvironments,
 			getProjects,

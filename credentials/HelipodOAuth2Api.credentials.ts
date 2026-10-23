@@ -39,7 +39,7 @@ export class HelipodOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'string',
-			default: 'containers vps domains:read email account:read',
+			default: 'containers vps domains databases email ai account',
 			description:
 				'Space-separated products the workflow may use (containers, vps, domains, databases, email, ai, account). Add ":read" for read-only access, and "spend" to allow purchases.',
 		},

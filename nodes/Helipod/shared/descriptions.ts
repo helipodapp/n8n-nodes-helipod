@@ -62,6 +62,13 @@ export const serviceSelect = uuidLocator(
 
 export const vpsSelect = uuidLocator('VPS', 'vps', 'getVpsList', 'The VPS');
 
+export const databaseSelect = uuidLocator(
+	'Database',
+	'database',
+	'getDatabases',
+	'The managed Postgres database (one per project)',
+);
+
 export const domainSelect: INodeProperties = {
 	displayName: 'Domain',
 	name: 'domainId',
