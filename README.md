@@ -25,18 +25,19 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 | Resource | Operations |
 | --- | --- |
-| Account | Get Invoices, Get Notifications, Get Wallet, Get Wallet Transactions, Mark Notification as Read |
+| Account | Create Deposit, Get Deposit, Get Deposits, Get Invoices, Get Notifications, Get Wallet, Get Wallet Transactions, Mark Notification as Read |
 | AI | Generate Image, Get Balance, Get Image, Get Models, Get Usage, Message a Model |
 | Database | Create, Execute Query, Get, Get Connection, Get Many, Get Tables |
 | Domain | Check Availability, Delete DNS Record, Get DNS Records, Get Many, Register, Update DNS Record |
 | Email | Send |
 | Project | Get, Get Many |
 | Service | Create, Create Stack, Delete Variable, Deploy, Deploy Template, Get, Get Deployments, Get Logs, Get Many, Get Templates, Restart, Set Variables |
-| Virtual Server (VPS) | Add Port Forward, Create, Create Snapshot, Get, Get Backup, Get Many, Get Metrics, Get Plans, Get Port Forwards, Get Restore Points, Remove Port Forward, Restart, Run Backup, Start, Stop |
+| Virtual Server (VPS) | Add Port Forward, Create, Create Snapshot, Get, Get Backup, Get Many, Get Metrics, Get Plans, Get Port Forwards, Get Restore Points, Remove Port Forward, Renew, Restart, Run Backup, Set Auto-Renew, Start, Stop |
 
 Operations that cost money (Service → Create, Create Stack, Deploy, Deploy Template; Domain → Register; VPS →
-Create; AI → Message a Model, Generate Image) are paid from the Helipod wallet or AI balance. Service → Create,
-Create Stack, Domain → Register and AI → Generate Image have a **Dry Run** switch that only returns the price.
+Create, Renew; AI → Message a Model, Generate Image) are paid from the Helipod wallet or AI balance. Service → Create,
+Create Stack, Domain → Register, VPS → Create, Renew and AI → Generate Image have a **Dry Run** switch that only
+returns the price. Account → Create Deposit makes a top-up payment link for a person to pay; nothing is charged.
 Database → Execute Query is read-only unless **Allow Writes** is on.
 
 Projects, environments, services, databases, VPS and domains can be picked from a searchable list or entered by
@@ -84,6 +85,9 @@ Tested with n8n 2.44.6 and 1.110.1. Requires n8n 1.0 or later.
   **Service → Restart**.
 - **Watch for errors:** **Service → Get Logs** with *Contains Text* set to `error`, then Slack or Email.
 - **Low balance alert:** **Account → Get Wallet** on a schedule, then notify when the balance is low.
+- **Top up when low:** **Account → Get Wallet**, then **Account → Create Deposit** and send its `paymentUrl` to
+  whoever pays; **Account → Get Deposit** shows when it is paid.
+- **Renew from your own billing:** create VPS with **Auto-Renew** off, then **VPS → Renew** after your customer pays.
 - **Send email:** **Email → Send** from an address on a domain verified in Helipod Email.
 - **Summarize with AI:** **Service → Get Logs**, then **AI → Message a Model** with the logs in the prompt.
 - **Report from your database:** **Database → Execute Query** on a schedule, then Google Sheets or Slack.
@@ -99,6 +103,13 @@ A deploy charges the service's cost for today, and **Set Variables** and **Delet
 * [Helipod API documentation](https://docs.helipod.io)
 
 ## Version history
+
+### 0.4.0
+
+- VPS → Create: **Dry Run** (price and wallet after it), **Auto-Renew** switch, and an automatic Idempotency-Key so
+  "Retry On Fail" never buys a second server.
+- VPS → Renew (with Dry Run) and Set Auto-Renew.
+- Account → Create Deposit (a wallet top-up payment link, with Dry Run), Get Deposit, Get Deposits.
 
 ### 0.3.0
 

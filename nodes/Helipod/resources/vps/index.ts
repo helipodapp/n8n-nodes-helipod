@@ -5,7 +5,14 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 import { projectSelect, vpsSelect } from '../../shared/descriptions';
-import { returnAllOrLimit, simplifyOption, simplifyTo, unwrapData } from '../../shared/utils';
+import {
+	dryRunOption,
+	idempotencyKey,
+	returnAllOrLimit,
+	simplifyOption,
+	simplifyTo,
+	unwrapData,
+} from '../../shared/utils';
 
 /** Get Backup answers null while backups are off: output { enabled: false } instead of an empty item. */
 async function backupState(
@@ -38,6 +45,19 @@ const SIMPLE_FIELDS = [
 const simplified = {
 	output: {
 		postReceive: [...unwrapData.output.postReceive, simplifyTo(SIMPLE_FIELDS)],
+	},
+};
+
+/** Create: simplified like before, except a dry run, whose answer is the price (kept whole). */
+const simplifyTheVps = simplifyTo(SIMPLE_FIELDS);
+const createOutput = {
+	output: {
+		postReceive: [
+			...unwrapData.output.postReceive,
+			async function (this: IExecuteSingleFunctions, items: INodeExecutionData[]) {
+				return this.getNodeParameter('dryRun', false) ? items : simplifyTheVps.call(this, items);
+			},
+		],
 	},
 };
 
@@ -82,9 +102,9 @@ export const vpsDescription: INodeProperties[] = [
 				description:
 					'Order a VPS. The whole billing period is charged from the wallet at once (refunded if setup fails).',
 				routing: {
-					send: { preSend: [createVpsBody] },
+					send: { preSend: [createVpsBody, idempotencyKey] },
 					request: { method: 'POST', url: '/vps' },
-					...simplified,
+					...createOutput,
 				},
 			},
 			{
@@ -177,6 +197,18 @@ export const vpsDescription: INodeProperties[] = [
 				},
 			},
 			{
+				name: 'Renew',
+				value: 'renew',
+				action: 'Renew a VPS',
+				description:
+					'Pay for another period from the wallet and move the expiry date forward. Turn on Dry Run to get the price first.',
+				routing: {
+					send: { preSend: [idempotencyKey] },
+					request: { method: 'POST', url: '=/vps/{{$parameter.vps}}/renew' },
+					...unwrapData,
+				},
+			},
+			{
 				name: 'Restart',
 				value: 'restart',
 				action: 'Restart a VPS',
@@ -194,6 +226,17 @@ export const vpsDescription: INodeProperties[] = [
 					'Start a backup now, on top of the daily one (a few per day). Backups must be on.',
 				routing: {
 					request: { method: 'POST', url: '=/vps/{{$parameter.vps}}/backup/run' },
+					...unwrapData,
+				},
+			},
+			{
+				name: 'Set Auto-Renew',
+				value: 'setAutoRenew',
+				action: 'Turn auto renew of a VPS on or off',
+				description:
+					'With auto-renew off, the VPS is only renewed by the Renew operation and expires otherwise',
+				routing: {
+					request: { method: 'POST', url: '=/vps/{{$parameter.vps}}/auto-renew' },
 					...unwrapData,
 				},
 			},
@@ -234,8 +277,10 @@ export const vpsDescription: INodeProperties[] = [
 					'getPorts',
 					'getRestorePoints',
 					'removePort',
+					'renew',
 					'restart',
 					'runBackup',
+					'setAutoRenew',
 					'start',
 					'stop',
 				],
@@ -357,7 +402,7 @@ export const vpsDescription: INodeProperties[] = [
 		displayName: 'Billing Period',
 		name: 'billingPeriod',
 		type: 'options',
-		displayOptions: { show: { ...showOnlyForVps, operation: ['create'] } },
+		displayOptions: { show: { ...showOnlyForVps, operation: ['create', 'renew'] } },
 		options: [
 			{ name: '3 Months', value: '3month' },
 			{ name: '6 Months', value: '6month' },
@@ -368,6 +413,32 @@ export const vpsDescription: INodeProperties[] = [
 		description: 'The whole period is charged at once',
 		routing: { send: { type: 'body', property: 'billingPeriod' } },
 	},
+	{
+		displayName: 'Auto-Renew',
+		name: 'autoRenew',
+		type: 'boolean',
+		displayOptions: { show: { ...showOnlyForVps, operation: ['create'] } },
+		default: true,
+		description:
+			'Whether the VPS renews itself from the wallet before it expires. Off: renew it with the Renew operation.',
+		routing: {
+			send: {
+				type: 'body',
+				property: 'autoRenew',
+				value: '={{ $value === false ? false : undefined }}',
+			},
+		},
+	},
+	{
+		displayName: 'Auto-Renew',
+		name: 'autoRenewValue',
+		type: 'boolean',
+		displayOptions: { show: { ...showOnlyForVps, operation: ['setAutoRenew'] } },
+		default: false,
+		description: 'Whether the VPS renews itself from the wallet before it expires',
+		routing: { send: { type: 'body', property: 'autoRenew' } },
+	},
+	dryRunOption({ resource: ['vps'], operation: ['create', 'renew'] }, 'buying'),
 
 	// ── Port forwards ──
 	{
