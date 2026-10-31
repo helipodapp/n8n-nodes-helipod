@@ -4,6 +4,44 @@ import { unwrapData } from '../../shared/utils';
 const showOnlyForEmailSend = { resource: ['email'], operation: ['send'] };
 const addressList = '={{ String($value).split(",").map(s => s.trim()).filter(Boolean) }}';
 
+/** Name / value pairs sent as a JSON object (templateData, variables, metadata, headers). */
+function pairs(
+	displayName: string,
+	name: string,
+	property: string,
+	description: string,
+	extra: Partial<INodeProperties> = {},
+): INodeProperties {
+	return {
+		displayName,
+		name,
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		placeholder: 'Add Value',
+		default: {},
+		description,
+		options: [
+			{
+				name: 'pair',
+				displayName: 'Value',
+				values: [
+					{ displayName: 'Name', name: 'name', type: 'string', default: '' },
+					{ displayName: 'Value', name: 'value', type: 'string', default: '' },
+				],
+			},
+		],
+		routing: {
+			send: {
+				type: 'body',
+				property,
+				value:
+					'={{ ($value.pair || []).filter(p => p.name).length ? Object.fromEntries(($value.pair || []).filter(p => p.name).map(p => [p.name, String(p.value ?? "")])) : undefined }}',
+			},
+		},
+		...extra,
+	} as INodeProperties;
+}
+
 export const emailDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
@@ -54,7 +92,7 @@ export const emailDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. Your order has shipped',
-		displayOptions: { show: showOnlyForEmailSend },
+		displayOptions: { show: { ...showOnlyForEmailSend, emailFormat: ['html', 'text', 'both'] } },
 		routing: { send: { type: 'body', property: 'subject' } },
 	},
 	{
@@ -67,8 +105,31 @@ export const emailDescription: INodeProperties[] = [
 			{ name: 'HTML', value: 'html', description: 'Send the message as HTML' },
 			{ name: 'Text', value: 'text', description: 'Send the message as plain text' },
 			{ name: 'Both', value: 'both', description: 'Send both an HTML and a plain text version' },
+			{
+				name: 'Template',
+				value: 'template',
+				description: 'Use a template saved in Helipod Email (it has its own subject)',
+			},
 		],
 	},
+	{
+		displayName: 'Template ID',
+		name: 'templateId',
+		type: 'string',
+		required: true,
+		default: '',
+		placeholder: 'e.g. 9476f67e-2b1c-4d3e-8f5a-6b7c8d9e0f1a',
+		description: 'The ID of a template from Helipod Email (Email › Templates)',
+		displayOptions: { show: { ...showOnlyForEmailSend, emailFormat: ['template'] } },
+		routing: { send: { type: 'body', property: 'templateId' } },
+	},
+	pairs(
+		'Template Data',
+		'templateData',
+		'templateData',
+		'Values for the {{placeholders}} in the template',
+		{ displayOptions: { show: { ...showOnlyForEmailSend, emailFormat: ['template'] } } },
+	),
 	{
 		displayName: 'HTML',
 		name: 'html',
@@ -117,6 +178,12 @@ export const emailDescription: INodeProperties[] = [
 				description: 'One or more addresses, separated by commas',
 				routing: { send: { type: 'body', property: 'cc', value: addressList } },
 			},
+			pairs(
+				'Custom Headers',
+				'headers',
+				'headers',
+				'Extra email headers (names: letters, digits, hyphens). Not with a template.',
+			),
 			{
 				displayName: 'Idempotency Key',
 				name: 'idempotencyKey',
@@ -127,6 +194,12 @@ export const emailDescription: INodeProperties[] = [
 					'A unique key for this message. Sending again with the same key does not send a second email.',
 				routing: { send: { type: 'body', property: 'idempotencyKey' } },
 			},
+			pairs(
+				'Metadata',
+				'metadata',
+				'metadata',
+				'Your own values stored with the email (returned when you look the email up)',
+			),
 			{
 				displayName: 'Project ID',
 				name: 'projectId',
@@ -145,6 +218,21 @@ export const emailDescription: INodeProperties[] = [
 				placeholder: 'e.g. support@example.com',
 				routing: { send: { type: 'body', property: 'replyTo' } },
 			},
+			{
+				displayName: 'Sensitive',
+				name: 'sensitive',
+				type: 'boolean',
+				default: false,
+				description:
+					'Whether the template data or variables hold a secret (a password, a one-time code): their values are wiped from the job record after the send',
+				routing: { send: { type: 'body', property: 'sensitive' } },
+			},
+			pairs(
+				'Variables',
+				'variables',
+				'variables',
+				'Values for {{placeholders}} written in the HTML, text or subject above',
+			),
 		],
 	},
 ];

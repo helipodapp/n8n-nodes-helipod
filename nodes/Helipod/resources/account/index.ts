@@ -110,6 +110,21 @@ export const accountDescription: INodeProperties[] = [
 		routing: { send: { type: 'query', property: 'limit' } },
 	},
 	{
+		displayName: 'Offset',
+		name: 'offset',
+		type: 'number',
+		displayOptions: {
+			show: {
+				...showOnlyForAccount,
+				operation: ['getDeposits', 'getNotifications', 'getTransactions'],
+			},
+		},
+		typeOptions: { minValue: 0 },
+		default: 0,
+		description: 'How many results to skip, for the next page',
+		routing: { send: { type: 'query', property: 'offset', value: '={{ $value || undefined }}' } },
+	},
+	{
 		displayName: 'Unread Only',
 		name: 'unreadOnly',
 		type: 'boolean',

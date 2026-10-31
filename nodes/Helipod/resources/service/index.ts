@@ -216,7 +216,7 @@ export const serviceDescription: INodeProperties[] = [
 				value: 'deploy',
 				action: 'Deploy a service',
 				description:
-					"Build and deploy the latest source of a service. A deploy charges the service's cost for today.",
+					"Build and deploy the latest source of a service. A deploy charges the service's cost for today, nothing within an active bundle's quota. Turn on Dry Run to see the cost first.",
 				routing: {
 					request: {
 						method: 'POST',
@@ -230,7 +230,7 @@ export const serviceDescription: INodeProperties[] = [
 				value: 'deployTemplate',
 				action: 'Deploy a template',
 				description:
-					'Create and deploy every service of a one-click template (n8n, WordPress, Postgres, ...). Billed daily.',
+					'Create and deploy every service of a one-click template (n8n, WordPress, Postgres, ...). Billed daily, from the bundle quota first. Turn on Dry Run to see the cost first.',
 				routing: {
 					send: { preSend: [templateBody, idempotencyKey] },
 					request: {
@@ -648,6 +648,8 @@ export const serviceDescription: INodeProperties[] = [
 		],
 	},
 	dryRunOption({ resource: ['service'], operation: ['create'] }, 'creating the service'),
+	dryRunOption({ resource: ['service'], operation: ['deploy'] }, 'deploying'),
+	dryRunOption({ resource: ['service'], operation: ['deployTemplate'] }, 'creating the services'),
 
 	// ── Deploy Template ──
 	{

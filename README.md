@@ -28,16 +28,17 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 | Account | Create Deposit, Get Deposit, Get Deposits, Get Invoices, Get Notifications, Get Wallet, Get Wallet Transactions, Mark Notification as Read |
 | AI | Generate Image, Get Balance, Get Image, Get Models, Get Usage, Message a Model |
 | Database | Create, Execute Query, Get, Get Connection, Get Many, Get Tables |
-| Domain | Check Availability, Delete DNS Record, Get DNS Records, Get Many, Register, Update DNS Record |
+| Domain | Check Availability, Delete DNS Record, Get DNS Records, Get Many, Register, Renew, Set Auto-Renew, Update DNS Record |
 | Email | Send |
 | Project | Get, Get Many |
 | Service | Create, Create Stack, Delete Variable, Deploy, Deploy Template, Get, Get Deployments, Get Logs, Get Many, Get Templates, Restart, Set Variables |
 | Virtual Server (VPS) | Add Port Forward, Create, Create Snapshot, Get, Get Backup, Get Many, Get Metrics, Get Plans, Get Port Forwards, Get Restore Points, Remove Port Forward, Renew, Restart, Run Backup, Set Auto-Renew, Start, Stop |
 
-Operations that cost money (Service → Create, Create Stack, Deploy, Deploy Template; Domain → Register; VPS →
+Operations that cost money (Service → Create, Create Stack, Deploy, Deploy Template; Domain → Register, Renew; VPS →
 Create, Renew; AI → Message a Model, Generate Image) are paid from the Helipod wallet or AI balance. Service → Create,
-Create Stack, Domain → Register, VPS → Create, Renew and AI → Generate Image have a **Dry Run** switch that only
-returns the price. Account → Create Deposit makes a top-up payment link for a person to pay; nothing is charged.
+Create Stack, Deploy, Deploy Template, Domain → Register, Renew, VPS → Create, Renew and AI → Generate Image have a
+**Dry Run** switch that only returns the price. Container services within an active bundle's quota cost the wallet
+nothing: their dry run shows `walletDailyCost` 0. Account → Create Deposit makes a top-up payment link for a person to pay; nothing is charged.
 Database → Execute Query is read-only unless **Allow Writes** is on.
 
 Projects, environments, services, databases, VPS and domains can be picked from a searchable list or entered by
@@ -103,6 +104,16 @@ A deploy charges the service's cost for today, and **Set Variables** and **Delet
 * [Helipod API documentation](https://docs.helipod.io)
 
 ## Version history
+
+### 0.5.0
+
+- Domain → Renew (with Dry Run) and Set Auto-Renew. Register: **Nameservers** and **Domain Owner** (register an
+  Indonesian domain in your customer's name instead of the account's owner details).
+- Email → Send: **Template** format (Template ID + Template Data), and Variables, Metadata, Custom Headers and
+  Sensitive options.
+- Service → Deploy and Deploy Template: **Dry Run**.
+- AI → Generate Image: Reference Image URLs. AI → Get Usage: filter by model.
+- Account → Get Deposits, Get Notifications, Get Wallet Transactions: Offset for paging.
 
 ### 0.4.0
 

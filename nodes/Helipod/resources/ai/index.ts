@@ -238,6 +238,22 @@ export const aiDescription: INodeProperties[] = [
 				description: 'One of the sizes of the model. Empty: its default size.',
 				routing: { send: { type: 'body', property: 'size', value: '={{ $value || undefined }}' } },
 			},
+			{
+				displayName: 'Reference Image URLs',
+				name: 'images',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. https://example.com/photo.jpg',
+				description:
+					'Images the model works from, https links separated by commas (only models that take reference images)',
+				routing: {
+					send: {
+						type: 'body',
+						property: 'images',
+						value: '={{ $value ? $value.split(",").map(s => s.trim()).filter(s => s) : undefined }}',
+					},
+				},
+			},
 		],
 	},
 	dryRunOption({ resource: ['ai'], operation: ['generateImage'] }, 'generating images'),
@@ -277,5 +293,15 @@ export const aiDescription: INodeProperties[] = [
 		default: 50,
 		description: 'Max number of results to return',
 		routing: { send: { type: 'query', property: 'limit' } },
+	},
+	{
+		displayName: 'Model',
+		name: 'usageModel',
+		type: 'string',
+		displayOptions: { show: { ...showOnlyForAi, operation: ['getUsage'] } },
+		default: '',
+		placeholder: 'e.g. deepseek/deepseek-v4',
+		description: 'Only requests to this model. Empty: every model.',
+		routing: { send: { type: 'query', property: 'model', value: '={{ $value || undefined }}' } },
 	},
 ];
