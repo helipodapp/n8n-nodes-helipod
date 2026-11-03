@@ -135,8 +135,12 @@ async function stackBody(
 	this: IExecuteSingleFunctions,
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
-	const parse = (name: string, label: string) => {
-		const raw = this.getNodeParameter(name, '') as string | IDataObject;
+	const options = this.getNodeParameter('stackOptions', {}) as {
+		inputs?: string | IDataObject;
+		deploy?: boolean;
+	};
+	const parse = (raw: string | IDataObject | undefined, label: string) => {
+		if (raw === undefined) return undefined;
 		if (typeof raw !== 'string') return raw;
 		if (!raw.trim()) return undefined;
 		try {
@@ -145,17 +149,17 @@ async function stackBody(
 			throw new NodeOperationError(this.getNode(), `${label} is not valid JSON`);
 		}
 	};
-	const spec = parse('stackSpec', 'Spec');
+	const spec = parse(this.getNodeParameter('stackSpec', '') as string | IDataObject, 'Spec');
 	if (!spec || typeof spec !== 'object' || Array.isArray(spec)) {
 		throw new NodeOperationError(this.getNode(), 'Spec must be a JSON object', {
 			description: 'For example { "version": 1, "services": [ ... ] }',
 		});
 	}
-	const inputs = parse('stackInputs', 'Inputs');
+	const inputs = parse(options.inputs, 'Inputs');
 	requestOptions.body = {
 		spec,
 		...(inputs ? { inputs } : {}),
-		...(this.getNodeParameter('stackDeploy', true) === false ? { deploy: false } : {}),
+		...(options.deploy === false ? { deploy: false } : {}),
 	};
 	return requestOptions;
 }
@@ -697,21 +701,29 @@ export const serviceDescription: INodeProperties[] = [
 			'The template spec: { version: 1, inputs?, services: [...] }. See https://docs.helipod.io/docs/container-api/templates-and-stacks.',
 	},
 	{
-		displayName: 'Inputs',
-		name: 'stackInputs',
-		type: 'json',
+		displayName: 'Options',
+		name: 'stackOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForServices, operation: ['createStack'] } },
-		default: '',
-		placeholder: 'e.g. { "DOMAIN": "app.example.com" }',
-		description: "A JSON object with answers to the spec's inputs",
-	},
-	{
-		displayName: 'Deploy',
-		name: 'stackDeploy',
-		type: 'boolean',
-		displayOptions: { show: { ...showOnlyForServices, operation: ['createStack'] } },
-		default: true,
-		description: 'Whether to deploy right away. Off: only create the services.',
+		default: {},
+		options: [
+			{
+				displayName: 'Deploy',
+				name: 'deploy',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to deploy right away. Off: only create the services.',
+			},
+			{
+				displayName: 'Inputs',
+				name: 'inputs',
+				type: 'json',
+				default: '',
+				placeholder: 'e.g. { "DOMAIN": "app.example.com" }',
+				description: "A JSON object with answers to the spec's inputs",
+			},
+		],
 	},
 	dryRunOption({ resource: ['service'], operation: ['createStack'] }, 'creating the stack'),
 

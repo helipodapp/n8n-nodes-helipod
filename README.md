@@ -105,6 +105,14 @@ A deploy charges the service's cost for today, and **Set Variables** and **Delet
 
 ## Version history
 
+### 0.5.1
+
+- Account → Get Deposits, Get Notifications, Get Wallet Transactions: **Return All** fetches every page itself;
+  otherwise Limit (up to 100). The Offset field is gone.
+- Optional fields moved into **Options**: Unread Only (Get Notifications), Model (AI → Get Usage), Query Parameters
+  (Database → Execute Query), TTL (Update DNS Record), WHOIS Privacy and Nameservers (Register), Inputs and Deploy
+  (Create Stack), Auto-Renew (VPS → Create). Workflows that set one of these need it set again under Options.
+
 ### 0.5.0
 
 - Domain → Renew (with Dry Run) and Set Auto-Renew. Register: **Nameservers** and **Domain Owner** (register an

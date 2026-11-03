@@ -10,14 +10,19 @@ import { returnAllOrLimit, unwrapData } from '../../shared/utils';
 
 const showOnlyForDatabases = { resource: ['database'] };
 
-type QueryOptions = { environmentId?: string; allowWrite?: boolean };
+type QueryOptions = {
+	environmentId?: string;
+	allowWrite?: boolean;
+	queryParameters?: string | unknown[];
+};
 
 /** Execute Query body: { sql, params?, environmentId?, allowWrite? }. Parameters are a JSON array or empty. */
 async function queryBody(
 	this: IExecuteSingleFunctions,
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
-	const raw = this.getNodeParameter('queryParameters', '') as string | unknown[];
+	const options = this.getNodeParameter('queryOptions', {}) as QueryOptions;
+	const raw = options.queryParameters ?? '';
 	let params: unknown[] | undefined;
 	if (Array.isArray(raw)) params = raw;
 	else if (typeof raw === 'string' && raw.trim()) {
@@ -34,7 +39,6 @@ async function queryBody(
 			});
 		}
 	}
-	const options = this.getNodeParameter('queryOptions', {}) as QueryOptions;
 	requestOptions.body = {
 		sql: this.getNodeParameter('sql') as string,
 		...(params?.length ? { params } : {}),
@@ -161,16 +165,7 @@ export const databaseDescription: INodeProperties[] = [
 		displayOptions: { show: { ...showOnlyForDatabases, operation: ['executeQuery'] } },
 		default: '',
 		placeholder: 'e.g. SELECT * FROM orders WHERE status = $1 LIMIT 10',
-		description: 'One SQL statement. Use $1, $2, ... for values and put them in Query Parameters.',
-	},
-	{
-		displayName: 'Query Parameters',
-		name: 'queryParameters',
-		type: 'json',
-		displayOptions: { show: { ...showOnlyForDatabases, operation: ['executeQuery'] } },
-		default: '',
-		placeholder: 'e.g. ["paid"]',
-		description: 'A JSON array with the values for $1, $2, ... in the SQL.',
+		description: 'One SQL statement. Use $1, $2, ... for values and put them in Options > Query Parameters.',
 	},
 	{
 		displayName: 'Output Rows',
@@ -197,6 +192,14 @@ export const databaseDescription: INodeProperties[] = [
 					'Whether statements that change data or schema (INSERT, UPDATE, DELETE, CREATE, DROP...) may run',
 			},
 			environmentOption,
+			{
+				displayName: 'Query Parameters',
+				name: 'queryParameters',
+				type: 'json',
+				default: '',
+				placeholder: 'e.g. ["paid"]',
+				description: 'A JSON array with the values for $1, $2, ... in the SQL.',
+			},
 		],
 	},
 	{

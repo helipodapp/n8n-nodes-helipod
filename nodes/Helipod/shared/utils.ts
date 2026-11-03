@@ -99,6 +99,59 @@ export function returnAllOrLimit(show: {
 	];
 }
 
+/** Largest page the Helipod offset-paged lists accept (?limit=1..100). */
+const PAGE_SIZE = 100;
+
+/**
+ * Operation routing for the offset-paged lists (?limit=&offset=): with Return All on, n8n follows the offset itself,
+ * page after page, until a page comes back shorter than PAGE_SIZE.
+ */
+export const offsetPagination = {
+	pagination: {
+		type: 'offset' as const,
+		properties: {
+			limitParameter: 'limit',
+			offsetParameter: 'offset',
+			pageSize: PAGE_SIZE,
+			type: 'query' as const,
+		},
+	},
+};
+
+/**
+ * Return All / Limit for the offset-paged lists. Return All fetches every page (see offsetPagination); otherwise one
+ * request asks the API for Limit results.
+ */
+export function returnAllOrLimitPaged(show: {
+	resource: string[];
+	operation: string[];
+}): INodeProperties[] {
+	return [
+		{
+			displayName: 'Return All',
+			name: 'returnAll',
+			type: 'boolean',
+			displayOptions: { show },
+			default: false,
+			description: 'Whether to return all results or only up to a given limit',
+			routing: { send: { paginate: '={{ $value }}' } },
+		},
+		{
+			displayName: 'Limit',
+			name: 'limit',
+			type: 'number',
+			displayOptions: { show: { ...show, returnAll: [false] } },
+			typeOptions: { minValue: 1, maxValue: PAGE_SIZE },
+			default: 50,
+			description: 'Max number of results to return',
+			routing: {
+				send: { type: 'query', property: 'limit' },
+				output: { maxResults: '={{$value}}' },
+			},
+		},
+	];
+}
+
 export function simplifyOption(show: { resource: string[]; operation: string[] }): INodeProperties {
 	return {
 		displayName: 'Simplify',

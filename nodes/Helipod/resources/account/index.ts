@@ -3,7 +3,9 @@ import {
 	dryRunOption,
 	idempotencyKey,
 	itemsFrom,
+	offsetPagination,
 	returnAllOrLimit,
+	returnAllOrLimitPaged,
 	unwrapData,
 } from '../../shared/utils';
 
@@ -44,7 +46,11 @@ export const accountDescription: INodeProperties[] = [
 				value: 'getDeposits',
 				action: 'Get deposits',
 				description: 'Get the deposits (wallet top-ups) of the account, newest first',
-				routing: { request: { method: 'GET', url: '/account/deposits' }, ...unwrapData },
+				routing: {
+					request: { method: 'GET', url: '/account/deposits' },
+					operations: offsetPagination,
+					...unwrapData,
+				},
 			},
 			{
 				name: 'Get Invoices',
@@ -59,7 +65,11 @@ export const accountDescription: INodeProperties[] = [
 				action: 'Get notifications',
 				description:
 					'Get the notifications of the account, newest first (deploys, renewals, low balance, ...)',
-				routing: { request: { method: 'GET', url: '/account/notifications' }, ...unwrapData },
+				routing: {
+					request: { method: 'GET', url: '/account/notifications' },
+					operations: offsetPagination,
+					...unwrapData,
+				},
 			},
 			{
 				name: 'Get Wallet',
@@ -75,6 +85,7 @@ export const accountDescription: INodeProperties[] = [
 				description: 'Get the wallet history, newest first (negative amounts are charges)',
 				routing: {
 					request: { method: 'GET', url: '/account/wallet/transactions' },
+					operations: offsetPagination,
 					output: { postReceive: [...unwrapData.output.postReceive, itemsFrom('transactions')] },
 				},
 			},
@@ -94,46 +105,33 @@ export const accountDescription: INodeProperties[] = [
 		default: 'getWallet',
 	},
 	...returnAllOrLimit({ resource: ['account'], operation: ['getInvoices'] }),
+	...returnAllOrLimitPaged({
+		resource: ['account'],
+		operation: ['getDeposits', 'getNotifications', 'getTransactions'],
+	}),
 	{
-		displayName: 'Limit',
-		name: 'limit',
-		type: 'number',
-		displayOptions: {
-			show: {
-				...showOnlyForAccount,
-				operation: ['getDeposits', 'getNotifications', 'getTransactions'],
-			},
-		},
-		typeOptions: { minValue: 1, maxValue: 100 },
-		default: 50,
-		description: 'Max number of results to return',
-		routing: { send: { type: 'query', property: 'limit' } },
-	},
-	{
-		displayName: 'Offset',
-		name: 'offset',
-		type: 'number',
-		displayOptions: {
-			show: {
-				...showOnlyForAccount,
-				operation: ['getDeposits', 'getNotifications', 'getTransactions'],
-			},
-		},
-		typeOptions: { minValue: 0 },
-		default: 0,
-		description: 'How many results to skip, for the next page',
-		routing: { send: { type: 'query', property: 'offset', value: '={{ $value || undefined }}' } },
-	},
-	{
-		displayName: 'Unread Only',
-		name: 'unreadOnly',
-		type: 'boolean',
+		displayName: 'Options',
+		name: 'notificationOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForAccount, operation: ['getNotifications'] } },
-		default: false,
-		description: 'Whether to return only notifications that were not read yet',
-		routing: {
-			send: { type: 'query', property: 'unreadOnly', value: '={{ $value ? "true" : undefined }}' },
-		},
+		default: {},
+		options: [
+			{
+				displayName: 'Unread Only',
+				name: 'unreadOnly',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to return only notifications that were not read yet',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'unreadOnly',
+						value: '={{ $value ? "true" : undefined }}',
+					},
+				},
+			},
+		],
 	},
 	{
 		displayName: 'Notification ID',

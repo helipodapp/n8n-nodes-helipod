@@ -414,20 +414,29 @@ export const vpsDescription: INodeProperties[] = [
 		routing: { send: { type: 'body', property: 'billingPeriod' } },
 	},
 	{
-		displayName: 'Auto-Renew',
-		name: 'autoRenew',
-		type: 'boolean',
+		displayName: 'Options',
+		name: 'createOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForVps, operation: ['create'] } },
-		default: true,
-		description:
-			'Whether the VPS renews itself from the wallet before it expires. Off: renew it with the Renew operation.',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'autoRenew',
-				value: '={{ $value === false ? false : undefined }}',
+		default: {},
+		options: [
+			{
+				displayName: 'Auto-Renew',
+				name: 'autoRenew',
+				type: 'boolean',
+				default: true,
+				description:
+					'Whether the VPS renews itself from the wallet before it expires. Off: renew it with the Renew operation.',
+				routing: {
+					send: {
+						type: 'body',
+						property: 'autoRenew',
+						value: '={{ $value === false ? false : undefined }}',
+					},
+				},
 			},
-		},
+		],
 	},
 	{
 		displayName: 'Auto-Renew',

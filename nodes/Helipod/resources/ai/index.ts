@@ -295,13 +295,24 @@ export const aiDescription: INodeProperties[] = [
 		routing: { send: { type: 'query', property: 'limit' } },
 	},
 	{
-		displayName: 'Model',
-		name: 'usageModel',
-		type: 'string',
+		displayName: 'Options',
+		name: 'usageOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForAi, operation: ['getUsage'] } },
-		default: '',
-		placeholder: 'e.g. deepseek/deepseek-v4',
-		description: 'Only requests to this model. Empty: every model.',
-		routing: { send: { type: 'query', property: 'model', value: '={{ $value || undefined }}' } },
+		default: {},
+		options: [
+			{
+				displayName: 'Model',
+				name: 'usageModel',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. deepseek/deepseek-v4',
+				description: 'Only requests to this model. Empty: every model.',
+				routing: {
+					send: { type: 'query', property: 'model', value: '={{ $value || undefined }}' },
+				},
+			},
+		],
 	},
 ];

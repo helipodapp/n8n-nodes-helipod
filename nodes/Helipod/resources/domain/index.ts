@@ -155,14 +155,23 @@ export const domainDescription: INodeProperties[] = [
 		routing: { send: { type: 'body', property: 'content' } },
 	},
 	{
-		displayName: 'TTL',
-		name: 'ttl',
-		type: 'number',
+		displayName: 'Options',
+		name: 'dnsRecordOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForDomains, operation: ['updateDnsRecord'] } },
-		typeOptions: { minValue: 60 },
-		default: 3600,
-		description: 'Time to live, in seconds',
-		routing: { send: { type: 'body', property: 'ttl' } },
+		default: {},
+		options: [
+			{
+				displayName: 'TTL',
+				name: 'ttl',
+				type: 'number',
+				typeOptions: { minValue: 60 },
+				default: 3600,
+				description: 'Time to live, in seconds',
+				routing: { send: { type: 'body', property: 'ttl' } },
+			},
+		],
 	},
 	{
 		displayName: 'Domain Name',
@@ -176,15 +185,6 @@ export const domainDescription: INodeProperties[] = [
 		routing: { send: { type: 'body', property: 'name' } },
 	},
 	{
-		displayName: 'WHOIS Privacy',
-		name: 'whoisProtection',
-		type: 'boolean',
-		default: false,
-		description: "Whether to hide the owner's details in WHOIS (charged yearly)",
-		displayOptions: { show: { ...showOnlyForDomains, operation: ['register'] } },
-		routing: { send: { type: 'body', property: 'whoisProtection' } },
-	},
-	{
 		displayName: 'Auto-Renew',
 		name: 'autoRenew',
 		type: 'boolean',
@@ -195,22 +195,39 @@ export const domainDescription: INodeProperties[] = [
 		routing: { send: { type: 'body', property: 'autoRenew' } },
 	},
 	{
-		displayName: 'Nameservers',
-		name: 'nameservers',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. ns1.example.net, ns2.example.net',
-		description:
-			'Comma-separated, 2 to 5. Leave empty to use Helipod DNS (then Get/Update DNS Records work).',
+		displayName: 'Options',
+		name: 'registerOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
 		displayOptions: { show: { ...showOnlyForDomains, operation: ['register'] } },
-		routing: {
-			send: {
-				type: 'body',
-				property: 'nameservers',
-				value:
-					'={{ $value ? $value.split(",").map(s => s.trim()).filter(s => s) : undefined }}',
+		default: {},
+		options: [
+			{
+				displayName: 'Nameservers',
+				name: 'nameservers',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. ns1.example.net, ns2.example.net',
+				description:
+					'Comma-separated, 2 to 5. Leave empty to use Helipod DNS (then Get/Update DNS Records work).',
+				routing: {
+					send: {
+						type: 'body',
+						property: 'nameservers',
+						value:
+							'={{ $value ? $value.split(",").map(s => s.trim()).filter(s => s) : undefined }}',
+					},
+				},
 			},
-		},
+			{
+				displayName: 'WHOIS Privacy',
+				name: 'whoisProtection',
+				type: 'boolean',
+				default: false,
+				description: "Whether to hide the owner's details in WHOIS (charged yearly)",
+				routing: { send: { type: 'body', property: 'whoisProtection' } },
+			},
+		],
 	},
 	{
 		displayName: 'Domain Owner',
